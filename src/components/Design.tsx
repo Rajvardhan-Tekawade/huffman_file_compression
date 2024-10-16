@@ -1,30 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 import Particles from "@tsparticles/react";
-import { initParticlesEngine } from "@tsparticles/react"; // This will allow you to initialize the engine
+import { initParticlesEngine } from "@tsparticles/react";
 import type { Container, Engine } from "@tsparticles/engine";
-import { loadFull } from "tsparticles"; // Load the full tsparticles library
-import { loadSlim } from "@tsparticles/slim"; // Optional, for slim particles
+import { loadFull } from "tsparticles";
 
 const Design: React.FC = () => {
     const [init, setInit] = useState(false);
 
-    // This should be run only once per application lifetime
     useEffect(() => {
         const initializeParticles = async () => {
-            // Initialize the tsParticles engine
             await initParticlesEngine(async (engine: Engine) => {
-                await loadFull(engine); // Load all particles features
-                // You can uncomment the following line if you need the slim version too
-                // await loadSlim(engine);
+                await loadFull(engine);
             });
-            setInit(true); // Set initialization complete
+            setInit(true);
         };
 
-        initializeParticles(); // Call the function
+        initializeParticles();
     }, []);
 
-    const particlesLoaded = useCallback((container: Container) => {
-        console.log(container); // Log the container when loaded
+    const particlesLoaded = useCallback(async (container?: Container) => {
+        if (container) {
+            console.log(container);
+        }
     }, []);
 
     return (
@@ -39,36 +36,36 @@ const Design: React.FC = () => {
                                 value: "transparent",
                             },
                         },
-                        fpsLimit: 120, // Limit the frame rate
+                        fpsLimit: 120,
                         interactivity: {
                             events: {
                                 onClick: {
                                     enable: true,
-                                    mode: "push", // Push particles on click
+                                    mode: "push",
                                 },
                                 onHover: {
                                     enable: true,
-                                    mode: "repulse", // Repulse particles on hover
+                                    mode: "repulse",
                                 },
                                 resize: true,
                             },
                             modes: {
                                 push: {
-                                    quantity: 4, // Number of particles to push
+                                    quantity: 4,
                                 },
                                 repulse: {
-                                    distance: 200, // Distance to repulse
-                                    duration: 0.4, // Duration of repulse effect
+                                    distance: 200,
+                                    duration: 0.4,
                                 },
                             },
                         },
                         particles: {
                             color: {
-                                value: "#ffffff", // Particle color
+                                value: "#ffffff",
                             },
                             links: {
-                                color: "#ffffff", // Link color between particles
-                                distance: 150, // Link distance
+                                color: "#ffffff",
+                                distance: 150,
                                 enable: true,
                                 opacity: 0.5,
                                 width: 1,
@@ -77,30 +74,30 @@ const Design: React.FC = () => {
                                 direction: "none",
                                 enable: true,
                                 outModes: {
-                                    default: "bounce", // Behavior on leaving the canvas
+                                    default: "bounce",
                                 },
                                 random: false,
-                                speed: 6, // Speed of particle movement
+                                speed: 6,
                                 straight: false,
                             },
                             number: {
                                 density: {
                                     enable: true,
-                                    area: 800, // Density area
+                                    area: 800,
                                 },
-                                value: 80, // Number of particles
+                                value: 80,
                             },
                             opacity: {
-                                value: 0.5, // Particle opacity
+                                value: 0.5,
                             },
                             shape: {
-                                type: "circle", // Shape of particles
+                                type: "circle",
                             },
                             size: {
-                                value: { min: 1, max: 5 }, // Size range for particles
+                                value: { min: 1, max: 5 },
                             },
                         },
-                        detectRetina: true, // Enable retina detection
+                        detectRetina: true,
                     }}
                     style={{
                         position: "absolute",
@@ -108,7 +105,7 @@ const Design: React.FC = () => {
                         height: "100%",
                         top: 0,
                         left: 0,
-                        zIndex: 1, // Ensure particles are above the background
+                        zIndex: 1,
                     }}
                 />
             )}

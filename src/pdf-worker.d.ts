@@ -1,4 +1,5 @@
 declare module 'pdfjs-dist/build/pdf.worker.mjs' {
-  const content: any;
+  const content: unknown;
   export default content;
 }
+

@@ -1,6 +1,6 @@
 import { saveAs } from 'file-saver'
 import { compressFile, decompressFile } from '../utils/huffman'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { Document, Packer, Paragraph } from 'docx';
 
 interface CompressDecompressProps {
@@ -102,16 +102,15 @@ const createDocxBlob = async (data: string): Promise<Blob> => {
 
 const createPdfBlob = async (data: string): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
-  let page = pdfDoc.addPage([595, 842]); // Change const to let
+  let page = pdfDoc.addPage([595, 842]);
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 12;
   const lineHeight = fontSize * 1.5;
   const margin = 50;
   const pageWidth = page.getWidth() - 2 * margin;
-  const pageHeight = page.getHeight() - 2 * margin;
 
   const words = data.split(/\s+/);
-  let lines = [];
+  const lines: string[] = [];
   let currentLine = '';
 
   words.forEach(word => {
@@ -125,7 +124,7 @@ const createPdfBlob = async (data: string): Promise<Blob> => {
   if (currentLine) lines.push(currentLine);
 
   let y = page.getHeight() - margin;
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     if (y < margin) {
       page = pdfDoc.addPage([595, 842]);
       y = page.getHeight() - margin;
