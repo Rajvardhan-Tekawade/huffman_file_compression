@@ -16,15 +16,35 @@ const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode, out
         console.log('Starting compression...');
         const compressedData = await compressFile(file);
         console.log('Compression completed, creating blob...');
-        const blob = new Blob([compressedData], { type: 'application/octet-stream' });
+        const extension = file.name.split('.').pop() || '';
+        const blob = new Blob([new Uint8Array([...Array.from(new TextEncoder().encode(extension)), 0]), compressedData], { type: 'application/octet-stream' });
         console.log('Saving compressed file...');
         saveAs(blob, `${file.name}.huf`);
       } else {
         console.log('Starting decompression...');
         const decompressedData = await decompressFile(file);
         console.log('Decompression completed, creating blob...');
-        const blob = new Blob([decompressedData], { type: 'text/plain;charset=utf-8' });
-        const fileName = 'decompressed_file.txt';
+
+        let blob: Blob;
+        let fileName: string;
+
+        switch (outputFormat) {
+          case 'txt':
+            blob = new Blob([decompressedData], { type: 'text/plain;charset=utf-8' });
+            fileName = 'decompressed_file.txt';
+            break;
+          case 'docx':
+            blob = await createDocxBlob(new TextDecoder().decode(decompressedData));
+            fileName = 'decompressed_file.docx';
+            break;
+          case 'pdf':
+            blob = await createPdfBlob(new TextDecoder().decode(decompressedData));
+            fileName = 'decompressed_file.pdf';
+            break;
+          default:
+            throw new Error('Unsupported output format');
+        }
+
         downloadBlob(blob, fileName);
       }
       console.log('File processing completed successfully');
