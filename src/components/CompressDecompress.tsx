@@ -1,12 +1,15 @@
 import { saveAs } from 'file-saver'
 import { compressFile, decompressFile } from '../utils/huffman'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { Document, Packer, Paragraph } from 'docx';
 
 interface CompressDecompressProps {
   file: File
   mode: 'compress' | 'decompress'
+  outputFormat: 'txt' | 'docx' | 'pdf'
 }
 
-const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode }) => {
+const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode, outputFormat }) => {
   const handleProcess = async () => {
     try {
       if (mode === 'compress') {
@@ -20,11 +23,33 @@ const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode }) =
         console.log('Starting decompression...');
         const decompressedData = await decompressFile(file);
         console.log('Decompression completed, creating blob...');
-        const newFileType = getFileType(file.name);
-        const blob = new Blob([decompressedData], { type: newFileType });
-        console.log('Saving decompressed file...');
-        const newName = file.name.replace(/\.huf$/, getFileExtension(file.name));
-        saveAs(blob, newName);
+        const mimeTypes = {
+          txt: 'text/plain',
+          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          pdf: 'application/pdf'
+        };
+
+        let blob: Blob;
+        let fileName: string;
+
+        switch (outputFormat) {
+          case 'txt':
+            blob = new Blob([decompressedData], { type: 'text/plain;charset=utf-8' });
+            fileName = 'decompressed_file.txt';
+            break;
+          case 'docx':
+            blob = await createDocxBlob(new TextDecoder().decode(decompressedData));
+            fileName = 'decompressed_file.docx';
+            break;
+          case 'pdf':
+            blob = await createPdfBlob(new TextDecoder().decode(decompressedData));
+            fileName = 'decompressed_file.pdf';
+            break;
+          default:
+            throw new Error('Unsupported output format');
+        }
+
+        downloadBlob(blob, fileName);
       }
       console.log('File processing completed successfully');
     } catch (error) {
@@ -54,5 +79,69 @@ function getFileExtension(fileName: string): string {
   if (fileName.endsWith('.docx.huf')) return '.docx';
   return '.txt';
 }
+
+const downloadBlob = (blob: Blob, fileName: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+const createDocxBlob = async (data: string): Promise<Blob> => {
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [new Paragraph(data)]
+    }]
+  });
+  const buffer = await Packer.toBuffer(doc);
+  return new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+};
+
+const createPdfBlob = async (data: string): Promise<Blob> => {
+  const pdfDoc = await PDFDocument.create();
+  let page = pdfDoc.addPage([595, 842]); // Change const to let
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontSize = 12;
+  const lineHeight = fontSize * 1.5;
+  const margin = 50;
+  const pageWidth = page.getWidth() - 2 * margin;
+  const pageHeight = page.getHeight() - 2 * margin;
+
+  const words = data.split(/\s+/);
+  let lines = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    if (font.widthOfTextAtSize(currentLine + ' ' + word, fontSize) <= pageWidth) {
+      currentLine += (currentLine ? ' ' : '') + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  });
+  if (currentLine) lines.push(currentLine);
+
+  let y = page.getHeight() - margin;
+  lines.forEach((line, index) => {
+    if (y < margin) {
+      page = pdfDoc.addPage([595, 842]);
+      y = page.getHeight() - margin;
+    }
+    page.drawText(line, {
+      x: margin,
+      y: y,
+      size: fontSize,
+      font: font,
+      lineHeight: lineHeight,
+    });
+    y -= lineHeight;
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  return new Blob([pdfBytes], { type: 'application/pdf' });
+};
 
 export default CompressDecompress

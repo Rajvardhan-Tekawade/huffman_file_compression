@@ -9,19 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^9.114.3",
+    "@react-three/fiber": "^8.17.10",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.5.0",
     "base64-arraybuffer": "^1.0.2",
+    "docx": "^9.0.2",
     "file-saver": "^2.0.5",
     "mammoth": "^1.8.0",
     "next": "14.2.15",
+    "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.7.76",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-tsparticles": "^2.12.2",
+    "three": "^0.169.0",
+    "tsparticles": "^3.5.0"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",
     "@types/jquery": "^3.5.31",
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.4",
+    "@types/pdfjs-dist": "^2.10.377",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18",
     "eslint": "^8",

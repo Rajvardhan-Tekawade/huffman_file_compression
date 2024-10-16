@@ -1,5 +1,8 @@
 import mammoth from 'mammoth';
-import pdfjs from './pdfWorker';
+import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist';
+
+// Set the worker source dynamically for browser environment
+GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
 
 // HuffmanNode class to represent a node in the Huffman tree
 class HuffmanNode {
@@ -79,15 +82,23 @@ async function getTextFromFile(file: File): Promise<string> {
             const { value: docxText } = await mammoth.extractRawText({ arrayBuffer: bufferDocx });
             return docxText;
         case 'pdf':
+            // Set the worker source dynamically
+            GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
             const arrayBufferPdf = await file.arrayBuffer();
-            const pdf = await pdfjs.getDocument({ data: arrayBufferPdf }).promise;
-            let pdfText = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                pdfText += content.items.map((item: any) => item.str).join(' ') + '\n';
+            const loadingTask = getDocument({ data: arrayBufferPdf });
+            try {
+                const pdf = await loadingTask.promise;
+                let pdfText = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    pdfText += content.items.map((item: any) => item.str).join(' ') + '\n';
+                }
+                return pdfText;
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                throw error;
             }
-            return pdfText;
         case 'txt':
             return await file.text();
         default:

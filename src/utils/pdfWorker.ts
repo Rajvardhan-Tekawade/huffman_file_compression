@@ -1,5 +1,16 @@
-import * as pdfjs from 'pdfjs-dist';
+import type { getDocument as GetDocumentType } from 'pdfjs-dist';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+let pdfjsLib: typeof import('pdfjs-dist');
+let getDocument: typeof GetDocumentType;
 
-export default pdfjs;
+if (typeof window !== 'undefined') {
+  const loadPdfjsLib = async () => {
+    pdfjsLib = await import('pdfjs-dist');
+    getDocument = pdfjsLib.getDocument;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  };
+
+  loadPdfjsLib();
+}
+
+export { getDocument };

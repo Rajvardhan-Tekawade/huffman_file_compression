@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // backgroundImage: {
+      //   'hero-pattern': "url('public/bg.jpg')",
+      // },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
