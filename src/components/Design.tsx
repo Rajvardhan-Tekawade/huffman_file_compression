@@ -47,7 +47,10 @@ const Design: React.FC = () => {
                                     enable: true,
                                     mode: "repulse",
                                 },
-                                resize: true,
+                                resize: {
+                                    enable: true,
+                                    delay: 0.5,
+                                },
                             },
                             modes: {
                                 push: {
