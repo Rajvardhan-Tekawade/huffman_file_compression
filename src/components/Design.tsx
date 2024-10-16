@@ -86,7 +86,6 @@ const Design: React.FC = () => {
                             number: {
                                 density: {
                                     enable: true,
-                                    area: 800,
                                 },
                                 value: 80,
                             },
