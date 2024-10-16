@@ -23,32 +23,8 @@ const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode, out
         console.log('Starting decompression...');
         const decompressedData = await decompressFile(file);
         console.log('Decompression completed, creating blob...');
-        const mimeTypes = {
-          txt: 'text/plain',
-          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          pdf: 'application/pdf'
-        };
-
-        let blob: Blob;
-        let fileName: string;
-
-        switch (outputFormat) {
-          case 'txt':
-            blob = new Blob([decompressedData], { type: 'text/plain;charset=utf-8' });
-            fileName = 'decompressed_file.txt';
-            break;
-          case 'docx':
-            blob = await createDocxBlob(new TextDecoder().decode(decompressedData));
-            fileName = 'decompressed_file.docx';
-            break;
-          case 'pdf':
-            blob = await createPdfBlob(new TextDecoder().decode(decompressedData));
-            fileName = 'decompressed_file.pdf';
-            break;
-          default:
-            throw new Error('Unsupported output format');
-        }
-
+        const blob = new Blob([decompressedData], { type: 'text/plain;charset=utf-8' });
+        const fileName = 'decompressed_file.txt';
         downloadBlob(blob, fileName);
       }
       console.log('File processing completed successfully');
@@ -66,18 +42,6 @@ const CompressDecompress: React.FC<CompressDecompressProps> = ({ file, mode, out
       {mode === 'compress' ? 'Compress' : 'Decompress'} File
     </button>
   )
-}
-
-function getFileType(fileName: string): string {
-  if (fileName.endsWith('.pdf')) return 'application/pdf';
-  if (fileName.endsWith('.docx')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-  return 'text/plain;charset=utf-8';
-}
-
-function getFileExtension(fileName: string): string {
-  if (fileName.endsWith('.pdf.huf')) return '.pdf';
-  if (fileName.endsWith('.docx.huf')) return '.docx';
-  return '.txt';
 }
 
 const downloadBlob = (blob: Blob, fileName: string) => {
